@@ -1,5 +1,5 @@
 # drupal-petfinder
-Drupal module for Petfinder.com API
+Drupal 7 module for Petfinder.com API
 
 # Utilizes 
 Brian Havari's Petfinder Class https://github.com/brianhaveri/Petfinder
