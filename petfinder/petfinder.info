@@ -1,0 +1,10 @@
+name = Pet Finder
+description = "This module integrates the petfinder.com API to search and find adoptable pets."
+package = Pet Finder API
+core = 7.x
+files[] = petfinder.module
+files[] = petfinder.install
+files[] = petfinder.admin.inc
+files[] = Petfinder.php
+configure = admin/config/petfinder/settings
+dependencies[] = xautoload (>= 7.x-5.0)

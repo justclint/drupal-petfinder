@@ -1,0 +1,264 @@
+<?php
+
+/**
+ * @file
+ *
+ * Integrates petfinder.com API
+ * 
+ */
+
+use Drupal\petfinder\PetfinderApi\Pet;
+use Drupal\petfinder\PetfinderApi\PetfinderRequest;
+
+define('PETFINDER_API_KEY', variable_get('petfinder_api_key', $default = NULL));
+define('PETFINDER_URL', variable_get('petfinder_url', $default = NULL));
+
+/**
+ * Implements hook_menu().
+ */
+function petfinder_menu() {
+	/**
+	 * Admin Pages
+	 */
+	$items['admin/config/petfinder'] = array(
+		'title' => 'Pet Finder',
+		'description' => 'Pet Finder Config',
+		'weight' => -5,
+		'position' => 'right',
+		'page callback' => 'system_admin_menu_block_page',
+		'access arguments' => array('administrator site configuration'),
+		'file' => 'system.admin.inc',
+		'file path' => drupal_get_path('module', 'system'),
+	);
+	$items['admin/config/petfinder/settings'] = array(
+		'title' => 'Settings',
+		'description' => 'Configure Pet Finder',
+		'page callback' => 'drupal_get_form', 
+		'page arguments' => array('petfinder_settings_form'),
+		'access arguments' => array('administrator site configuration'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'petfinder.admin.inc',
+	);
+	/**
+	 * User Pages
+	 */
+	/**
+	 * Public Pages
+	 */
+	$items[PETFINDER_URL.'/%'] = array(
+		'title' => 'Pet Profile',
+		'description' => 'Profile page for pets',
+		'page callback' => 'petfinder_view_pet_page', 
+		'page arguments' => array(1),
+		'access arguments' => array('access content'),
+		//'type' => MENU_NORMAL_ITEM,
+	); 
+	$items[PETFINDER_URL.'/results/%'] = array(
+		'title' => 'Search Results',
+		'description' => '',
+		'page callback' => 'petfinder_search_results_page',
+		'page arguments' => array(2),
+		'access arguments' => array('access content'),
+		//'type' => MENU_NORMAL_ITEM,
+	);	
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function petfinder_block_info() {
+  $blocks['random'] = array(
+    'info' => t('Pet Finder - Random'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['search'] = array(
+    'info' => t('Pet Finder - Search'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function petfinder_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'random':
+      //$block['subject'] = t('Random Pet');
+      $block['content'] = array(
+        '#markup' => petfinder_random_pet_block_content(),
+        '#attached' => array(
+          'css' => array(
+            drupal_get_path('module', 'petfinder') . '/assets/css/petfinder-block.css',
+          ),
+        ),
+      );
+      break;
+    case 'search':
+      $block['subject'] = t('Search Pets');
+      $block['content'] = drupal_get_form('petfinder_search_form');
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Block content for random pet 
+ * @return markup 
+ */
+function petfinder_random_pet_block_content() {
+	$getPet = PetfinderRequest::randomPet(PETFINDER_API_KEY);
+	$pet = new Pet($getPet);
+	$output = '';
+	if (array_key_exists('photos', $getPet['pet']['media'])) {
+		$images = $pet->getImages();
+		$photo = $images['3']['$t'];
+		$petId = $pet->getId();
+		$output = '<div class="petfinder-photo">';
+		$output .= '<a href="/' . PETFINDER_URL . '/' . $petId . '">';
+		$output .= '<img src="' . $photo . '">';
+		$output .= '</a>';
+		$output .= '</div>';
+	}
+	$output .= '<div>' . t($pet->getName()) . '</div>';
+	$output .= '<div>' . t($pet->getContact()['phone']) . '</div>';
+	return $output;
+}
+
+/**
+ * Block with search form	
+ * @return form Drupal form
+ */
+function petfinder_search_pets_block_content() {
+	drupal_get_form('petfinder_search_form');
+}
+
+function petfinder_search_form($form, &$form_state) {
+	$form['#attributes']['class'][] = 'petfinder-form';
+	$form['location'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('Location'),
+	);
+	// $form['type'] = array(
+	// 	'#type' => 'select',
+	// 	'#title' => t('Type'),
+	// 	'#options' => array(
+	// 		'' => t('--select--'),
+	// 		'dog' => t('Dog'),
+	// 		'cat' => t('Cat'),
+	// 		'rabbit' => t('Rabbit'),
+	// 		'smallfurry' => t('Small & Furry'),
+	// 		'horse' => t('Horse'),
+	// 		'bird' => t('Bird'),
+	// 		'reptile' => t('Scales, Fins & Others'),
+	// 		'pig' => t('Pig'),
+	// 		'barnyard' => t('Barnyard'),
+	// 	),
+	// 	'#default_value' => '',
+	// );
+	// $form['breed'] = array(
+	// 	'#type' => 'textfield',
+	// 	'#title' => t('breed'),
+	// );
+	// $form['age'] = array(
+	// 	'#type' => 'select',
+	// 	'#title' => t('Age'),
+	// 	'#options' => array(
+	// 		'' => t('--select--'),
+	// 		'baby' => t('Baby'),
+	// 		'young' => t('Young'),
+	// 		'adult' => t('Adult'),
+	// 		'senior' => t('Senior'),
+	// 	),
+	// 	'#default_value' => '',
+	// );
+
+	$form['#attached']['css'] = array(
+  	drupal_get_path('module', 'petfinder') . '/assets/css/jquery-ui-smoothness-theme.css',
+	);
+	$form['#attached']['js'] = array(
+  	drupal_get_path('module', 'petfinder') . '/assets/js/geonames.js',
+	);
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+/**
+ * Submit for search form	
+ * @param  array $form Drupal form
+ * @param  array &$form_state Drupal form values and data
+ */
+function petfinder_search_form_submit($form, &$form_state) {
+	$location = $form_state['values']['location'];
+	// $type = $form_state['values']['type'];
+	// $breed = $form_state['values']['breed'];
+	// $age = $form_state['values']['age'];
+  $form_state['redirect'] = PETFINDER_URL.'/results'.'/'.$location;
+}
+
+/**
+ * @todo set validation for form fields. Waiting to modify pet_find() to add more search fields
+ * currently only accepting location parameter
+ */
+function petfinder_search_form_validate($form, &$form_state) {
+}
+
+/**
+ * Markup for search results page
+ * @param  string $location search by location
+ * @return string Outputs markup
+ */
+function petfinder_search_results_page($location) {
+	$getPets = PetfinderRequest::searchPets(PETFINDER_API_KEY, $location);
+	//$pets = array();
+	$pet = array();
+	if (array_key_exists('pets', $getPets)) {
+		$output = '<div class="petfinder">';
+		$output .= '<ul>';
+		foreach($getPets['pets']['pet'] as $key => $value){
+			$pets[$key] = new Pet($value);
+			$output .= '<li>';
+			if (array_key_exists('photos', $pets[$key]->pet['media'])) {
+				$output .= '<a href="/'.PETFINDER_URL.'/'.$pets[$key]->getSearchPetId().'"><img src="'.$pets[$key]->getSearchPetImages()['3']['$t'].'"></a>';
+			}
+			$output .= '<div>' . t($pets[$key]->getSearchPetName()) . '</div>';
+			$output .= '<div>' . t($pets[$key]->getSearchPetContact()['phone']) . '</div>';
+			$output .= '</li>';
+		}	
+		$output .= '</ul>';
+		$output .= '</div>';
+	} 
+	else {
+		$output = '<div>There are no results for this location.</div>';
+	}
+	return $output;
+}
+
+/**
+ * Markup for pet profile page
+ * @param  string $petId Pass petid to load singlePet()
+ * @return string	Outputs markup
+ */
+function petfinder_view_pet_page($petId) {
+	$getPet = PetfinderRequest::singlePet(PETFINDER_API_KEY, $petId);
+	$pet = new Pet($getPet);
+	$images = $pet->getImages();
+	$output = '<div class="petfinder">';
+	$output .= '<ul>';
+	foreach ($images as $key => $value) {
+		if ($value['@size'] == 'fpm') {
+			$output .= '<li><img src="' . $value['$t'] . '"></li>';
+		}
+	}
+	$output .= '</ul>';
+	$output .= '</div>';
+	$output .= '<div>' . t($pet->getName()) . '</div>';
+	$output .= '<div>' . t($pet->getContact()['phone']) . '</div>';
+	return $output;
+}

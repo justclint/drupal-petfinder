@@ -1,0 +1,14 @@
+.petfinder ul, .petfinder-form ul {
+  list-style: none;
+}
+.petfinder-form input[type="text"], .petfinder-form select {
+  width:100%;
+}
+.petfinder-photo img {
+  width:100%;
+}
+
+/* Geoname Autoloading  */
+.ui-autocomplete-loading {
+  background: white url("https://jquery-ui.googlecode.com/svn/tags/1.8.2/themes/smoothness/images/ui-anim_basic_16x16.gif") right center no-repeat;
+}

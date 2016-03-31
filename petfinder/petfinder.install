@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * 
+ * Installtion file for Pet Finder
+ * 
+ */
+ 
+/**
+* Implement hook_uninstall()
+*/
+function petfinder_uninstall() {
+
+  db_delete('variable')
+    ->condition('name', 'petfinder_%', 'LIKE')
+    ->execute();
+
+  cache_clear_all('variables', 'cache_bootstrap');	
+}
