@@ -6,6 +6,10 @@ Brian Havari's Petfinder Class https://github.com/brianhaveri/Petfinder
 
 GeoNames City lookup http://genames.org
 
+# Required Modules
+1. Jquery Update https://www.drupal.org/project/jquery_update
+2. X Autoload https://www.drupal.org/project/xautoload
+
 # Instructions
 1. Get your API key from http://www.petfinder.com/developers/api-key
 2. Set jquery update to pull from jquery cdn
