@@ -13,6 +13,5 @@ GeoNames City lookup http://genames.org
 4. Flush cache
 5. In Blocks you will find 'Petfinder - Search' and 'Petfinder - Random'. Place those where you'd like.
 
-You can search using the the seach block and click on an a pet to view its profile. 
-
-* Profile file only currently showing image, pet name and contact phone. More to come.
+You can search using the the seach block and click on a pet image to view its profile. 
+- Profile file only currently showing image, pet name and contact phone. More to come.
