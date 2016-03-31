@@ -8,4 +8,4 @@ files[] = petfinder.admin.inc
 files[] = Petfinder.php
 configure = admin/config/petfinder/settings
 dependencies[] = xautoload (>= 7.x-5.0)
-dependencies[] = jquery_update (>= 7.x-5.0)
+dependencies[] = jquery_update
