@@ -21,3 +21,6 @@ GeoNames City lookup http://genames.org
 
 You can search using the the seach block and click on a pet image to view its profile. 
 * Profile file only currently showing image, pet name and contact phone. More to come.
+
+# demo
+http://petfin.dev6.webenabled.net/
