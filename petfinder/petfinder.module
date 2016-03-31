@@ -180,6 +180,7 @@ function petfinder_search_form($form, &$form_state) {
   	drupal_get_path('module', 'petfinder') . '/assets/css/jquery-ui-smoothness-theme.css',
 	);
 	$form['#attached']['js'] = array(
+    drupal_add_library('system', 'ui'),
   	drupal_get_path('module', 'petfinder') . '/assets/js/geonames.js',
 	);
   $form['submit'] = array(
